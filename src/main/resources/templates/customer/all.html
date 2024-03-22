@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/header::header"></head>
+<body>
+<div th:replace="layout/top :: top(header='Customer Chart TOP 100')"></div>
+
+<div class="container text-center">
+    <form th:action="@{/customer}" method="get">
+    <div class="row">
+        <div class="col-2">
+            <div class="tt">
+                <h5>코드번호</h5>
+            </div>
+            <div>
+                <select class="form-select" id="code" name="code" style="text-align: center;">
+                    <option value="" selected>전체</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-2">
+            <div class="tt">
+                <h5>성별</h5>
+            </div>
+            <select class="form-select" id="gender" name="gender" style="text-align: center;">
+                <option value="" selected>전체</option>
+            </select>
+        </div>
+        <div class="col-4">
+            <div class="input-group mt-5">
+                <div class="mt-1">
+                    <p>시작일&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;종료일</p>
+                </div>
+                <div>
+                    <input class="textBox ms-3" type="text" id="startDate" name="startDate" value="20200101">
+                    ~&nbsp;&nbsp;&nbsp;&nbsp;
+                    <input class="textBox" type="text" id="endDate" name="endDate" value="20201231">
+                </div>
+            </div>
+        </div>
+        <div class="col-2 mt-4">
+        </div>
+        <div class="col-2 mt-5">
+            <div class="mt-5"><a th:href="@{/customer/part}" class="btn btn-warning btn-lg">부분 검색</a></div>
+        </div>
+    </div>
+    </form>
+</div>
+
+<div class="container mt-4">
+    <table class="table table-bordered">
+        <thead class="fs-5 bg-secondary fw-bold text-center">
+            <td>회원번호</td>
+            <td>이름</td>
+            <td>주소</td>
+            <td>메일</td>
+            <td>구매총액</td>
+        </thead>
+        <tbody th:each="result : ${result}">
+            <td th:text="${result.customerId}" class="text-center"></td>
+            <td th:text="${result.name}" class="text-center"></td>
+            <td th:text="${result.address}" class="text-center"></td>
+            <td th:text="${result.email}" class="text-center"></td>
+            <td th:text="${#numbers.formatDecimal(result.total, 3, 'COMMA', 0, 'POINT')}" class="text-center"></td>
+        </tbody>
+    </table>
+</div>
+
+<div th:replace="layout/footer::footer"></div>
+</body>
+</html>

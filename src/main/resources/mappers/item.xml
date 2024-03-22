@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="tuning.com.dao.ItemDao">
+
+    <select id="selectTotalSale" resultType="ItemDto">
+        <![CDATA[
+            select /*+ leading(s) use_hash(i) no_merge(s) */ i.item_id, name, vendor, jan, feb, mar, apr, may, jun, jul, aug, sep, oct, nov, dec, total
+            from
+                (select item_id
+                    ,sum(case when order_date between to_date('20200101', 'yyyymmdd') and to_date('20200201', 'yyyymmdd') - 1/(60*60*24) then quantity end) jan
+                    ,sum(case when order_date between to_date('20200201', 'yyyymmdd') and to_date('20200301', 'yyyymmdd') - 1/(60*60*24) then quantity end) feb
+                    ,sum(case when order_date between to_date('20200301', 'yyyymmdd') and to_date('20200401', 'yyyymmdd') - 1/(60*60*24) then quantity end) mar
+                    ,sum(case when order_date between to_date('20200401', 'yyyymmdd') and to_date('20200501', 'yyyymmdd') - 1/(60*60*24) then quantity end) apr
+                    ,sum(case when order_date between to_date('20200501', 'yyyymmdd') and to_date('20200601', 'yyyymmdd') - 1/(60*60*24) then quantity end) may
+                    ,sum(case when order_date between to_date('20200601', 'yyyymmdd') and to_date('20200701', 'yyyymmdd') - 1/(60*60*24) then quantity end) jun
+                    ,sum(case when order_date between to_date('20200701', 'yyyymmdd') and to_date('20200801', 'yyyymmdd') - 1/(60*60*24) then quantity end) jul
+                    ,sum(case when order_date between to_date('20200801', 'yyyymmdd') and to_date('20200901', 'yyyymmdd') - 1/(60*60*24) then quantity end) aug
+                    ,sum(case when order_date between to_date('20200901', 'yyyymmdd') and to_date('20201001', 'yyyymmdd') - 1/(60*60*24) then quantity end) sep
+                    ,sum(case when order_date between to_date('20201001', 'yyyymmdd') and to_date('20201101', 'yyyymmdd') - 1/(60*60*24) then quantity end) oct
+                    ,sum(case when order_date between to_date('20201101', 'yyyymmdd') and to_date('20201201', 'yyyymmdd') - 1/(60*60*24) then quantity end) nov
+                    ,sum(case when order_date between to_date('20201201', 'yyyymmdd') and to_date('20210101', 'yyyymmdd') - 1/(60*60*24) then quantity end) dec
+                    ,sum(case when order_date between to_date('20200101', 'yyyymmdd') and to_date('20210101', 'yyyymmdd') - 1/(60*60*24) then quantity end) total
+                from orderItems
+                group by item_id) s, item i
+            where i.item_id = s.item_id
+            order by i.item_id
+        ]]>
+    </select>
+
+</mapper>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="tuning.com.dao.CustomerDao">
+
+    <select id="selectTopCustomer" parameterType="FindCustomerDto" resultType="CustomerDto">
+        <![CDATA[
+                SELECT customer_id customerId, name, address, email, total, to_number(#{page}) page
+                FROM (
+                    SELECT customer_id, name, address, email, total, rownum rn
+                    FROM (
+                        SELECT /*+ ordered index(c customer_x1) use_hash(o) full(o) */
+                            c.customer_id, min(c.name) name, min(c.address) address, min(c.email) email, sum(o.total_sale) total
+                        FROM customer c
+                        JOIN orderInfo o ON c.customer_id = o.customer_id
+                        WHERE c.code = #{code}
+                        AND c.gender = #{gender}
+                        AND o.order_date BETWEEN TO_DATE(#{startDate}, 'yyyymmdd') AND TO_DATE(#{endDate}, 'yyyymmdd') - 1/(60*60*24)
+                        group by c.customer_id
+                        ORDER BY total DESC
+                    )
+                    where rownum <= #{page} * 20
+                )
+                WHERE rn >= (#{page}-1)*20+1
+        ]]>
+    </select>
+
+    <select id="selectAllCustomer" resultType="CustomerAllDto">
+        <![CDATA[
+        SELECT /*+ leading(o) use_nl(c) no_nlj_batching(c) */
+            c.customer_id customerId, name, address, email, total
+        FROM customer c
+            ,(SELECT o.customer_id, total, rownum rn
+                FROM
+                    (SELECT /*+ full(o) parallel(o 4) */ o.customer_id, SUM(o.total_sale) total
+                    FROM orderInfo o
+                    GROUP BY o.customer_id
+                    ORDER BY total desc) o
+                WHERE rownum <= 100) o
+        WHERE c.customer_id = o.customer_id
+        ]]>
+    </select>
+
+</mapper>
